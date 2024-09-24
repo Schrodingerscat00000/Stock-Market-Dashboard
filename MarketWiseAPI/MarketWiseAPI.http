@@ -1,0 +1,6 @@
+@MarketWiseAPI_HostAddress = http://localhost:5124
+
+GET {{MarketWiseAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
