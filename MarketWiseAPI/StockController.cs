@@ -24,7 +24,7 @@ namespace StockAPI.Controllers
         [HttpGet("{ticker}")]
         public async Task<IActionResult> GetStockData(string ticker)
         {
-            var apiKey = "8SDDTCNMZUHB0PTF"; // Add your Alpha Vantage API key
+            var apiKey = "8SDDTCNMZUHB0PTF"; 
             var url = $"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={ticker}&apikey={apiKey}";
 
             // Create RestClient and request
@@ -44,18 +44,18 @@ namespace StockAPI.Controllers
                     return BadRequest("No stock data available for the given ticker.");
                 }
 
-                var stockEntityList = new List<StockEntity>();  // Changed to StockEntity (your model class)
+                var stockEntityList = new List<StockEntity>();  
                 var closePrices = new List<double>();
                 var openPrices = new List<double>();
                 var highPrices = new List<double>();
                 var lowPrices = new List<double>();
                 var volumes = new List<double>();
 
-                // Iterate over the timeSeries as KeyValuePair to get both the date (key) and stock data (value)
+                
                 foreach (KeyValuePair<string, JToken> item in timeSeries)
                 {
-                    var date = item.Key;  // Extract the date
-                    var stockInfo = item.Value;  // Extract the stock data for the date
+                    var date = item.Key;  
+                    var stockInfo = item.Value;  
 
                     var close = stockInfo["4. close"]?.ToString();
                     var open = stockInfo["1. open"]?.ToString();
@@ -63,7 +63,7 @@ namespace StockAPI.Controllers
                     var low = stockInfo["3. low"]?.ToString();
                     var volume = stockInfo["5. volume"]?.ToString();
 
-                    // Store in StockEntity for database storage
+                    
                     var stockEntity = new StockEntity
                     {
                         Ticker = ticker,
@@ -77,7 +77,7 @@ namespace StockAPI.Controllers
 
                     stockEntityList.Add(stockEntity);
 
-                    // Collect data for calculations
+                    
                     if (double.TryParse(close, out double closePrice))
                     {
                         closePrices.Add(closePrice);
@@ -104,26 +104,26 @@ namespace StockAPI.Controllers
                     }
                 }
 
-                // Convert stockEntityList to List<StockData>
+                
                 var stockDataList = stockEntityList.Select(e => new StockData
                 {
                     Ticker = e.Ticker,
-                    Date = DateTime.Parse(e.Date),  // Convert string to DateTime
-                    Open = decimal.Parse(e.Open),   // Convert string to decimal
-                    Close = decimal.Parse(e.Close), // Convert string to decimal
-                    High = decimal.Parse(e.High),   // Convert string to decimal
-                    Low = decimal.Parse(e.Low),     // Convert string to decimal
-                    Volume = long.Parse(e.Volume)   // Convert string to long
+                    Date = DateTime.Parse(e.Date), 
+                    Open = decimal.Parse(e.Open),   
+                    Close = decimal.Parse(e.Close), 
+                    High = decimal.Parse(e.High),   
+                    Low = decimal.Parse(e.Low),     
+                    Volume = long.Parse(e.Volume)   
                 }).ToList();
 
-                // Save stock data to the database
+                
                 await _context.StockData.AddRangeAsync(stockDataList);
                 await _context.SaveChangesAsync();
 
-                // Calculate the 5-day simple moving average (SMA)
+                
                 var movingAverages = CalculateMovingAverages(closePrices, 5);
 
-                // Return stock data, moving averages, and additional information (open, high, low, volume)
+                
                 return Ok(new
                 {
                     StockData = stockDataList,
@@ -138,7 +138,7 @@ namespace StockAPI.Controllers
             return BadRequest("Error fetching stock data.");
         }
 
-        // Method to calculate the SMA (Simple Moving Average)
+        
         private List<double?> CalculateMovingAverages(List<double> prices, int period)
         {
             var movingAverages = new List<double?>();
@@ -147,7 +147,7 @@ namespace StockAPI.Controllers
             {
                 if (i < period - 1)
                 {
-                    movingAverages.Add(null);  // Not enough data points for this moving average
+                    movingAverages.Add(null);  
                 }
                 else
                 {
